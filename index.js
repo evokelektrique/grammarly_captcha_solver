@@ -69,13 +69,12 @@ list = generate_list(list_data);
         args: global_args,
     });
 
-    const page = await browser.newPage();
+    for (let index = 0; index < list.length; index++) {
+        const page = await browser.newPage();
+        const credential = list[index];
 
-    list.forEach(async (credential) => {
-        await retry(() => {
-            operation(page, credential);
-        }, 3);
-    });
+        await retry(() => operation(page, credential), 3);
+    }
 })();
 
 /**
@@ -148,7 +147,8 @@ async function operation(page, credential) {
 
     // Wait for Continue button text
     await page.waitForFunction(
-        "document.querySelector('button[data-qa=\"btnLogin\"]').innerText == 'Continue'"
+        "document.querySelector('button[data-qa=\"btnLogin\"]').innerText == 'Continue'",
+        { timeout: 60000 }
     );
     console.log("Found submit button");
 
@@ -158,13 +158,14 @@ async function operation(page, credential) {
 
     // Click on Continue button
     await page.click("button[data-qa='btnLogin']");
-    console.log("Clicked submit button");
+    console.log("Clicked continue button");
 
     // Wait for Sign in button text
     await page.waitForFunction(
-        "document.querySelector('button[data-qa=\"btnLogin\"]').innerText == 'Sign in'"
+        "document.querySelector('button[data-qa=\"btnLogin\"]').innerText == 'Sign in'",
+        { timeout: 60000 }
     );
-    console.log("Found submit button");
+    console.log("Found sign in button");
 
     // Type Password
     await page.focus('input[name="password"]');
@@ -172,11 +173,11 @@ async function operation(page, credential) {
 
     // Click on Sign in button text
     await page.click("button[data-qa='btnLogin']");
-    console.log("Clicked submit button");
+    console.log("Clicked sing in button");
 
     // Solve captcha
     await page
-        .waitForSelector(".antigate_solver.solved", { timeout: 40000 }) // 40s timeout
+        .waitForSelector(".antigate_solver.solved", {timeout: 60000}) // 1 minute timeout
         .catch(async () => {
             console.log("failed to wait for the selector");
             throw new Error("failed to solve the captcha");
