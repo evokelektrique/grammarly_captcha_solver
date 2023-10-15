@@ -123,7 +123,7 @@ function generate_list(data) {
 /**
  * Solve the grammarly captcha
  *
- * @param {Puppeteer} page Browser tab
+ * @param {puppeteer} page Browser tab
  * @param {Object} credential Account credential
  */
 async function operation(page, credential) {
@@ -177,7 +177,7 @@ async function operation(page, credential) {
 
     // Solve captcha
     await page
-        .waitForSelector(".antigate_solver.solved", {timeout: 60000}) // 1 minute timeout
+        .waitForSelector(".antigate_solver.solved", { timeout: 60000 }) // 1 minute timeout
         .catch(async () => {
             console.log("failed to wait for the selector");
             throw new Error("failed to solve the captcha");
@@ -192,6 +192,19 @@ async function operation(page, credential) {
         console.log("Operation done");
     }
 
+    // Clear cookies
+    await clearBrowser(page);
+    
     // Close the tab
     await page.close();
+}
+
+/**
+ * Clear all cookies using the browser's dev tools
+ * 
+ * @param {puppeteer} page Browser tab
+ */
+async function clearBrowser(page) {
+    const client = await page.target().createCDPSession()
+    await client.send('Network.clearBrowserCookies')
 }
